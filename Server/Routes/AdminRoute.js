@@ -89,4 +89,13 @@ router.get('/employee', (req, res) => {
     });
 });
 
+router.get('employee/:id', (req, res) => {
+    const id = req.params.id;
+    const sql = "SELECT * FROM employee WHERE id = ?";
+    con.query(sql, [id], (err, result) => {
+        if (err) return res.json({ Status: false, Error: "Query error" })
+        return res.json({ Status: true, Result: result })
+    });
+})
+
 export { router as AdminRouter }
