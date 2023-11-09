@@ -43,7 +43,7 @@ router.post('/add_category', (req, res) => {
     });
 });
 
-// Image upload
+// Image upload and storage destination
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'Public/Images')
@@ -57,7 +57,9 @@ const upload = multer({
     storage: storage
 })
 
-// End of image ulpoad
+// End of image upload
+
+// Adding employees into the system
 
 router.post('/add_employee', upload.single('image'), (req, res) => {
     const sql = `INSERT INTO employee
@@ -81,6 +83,8 @@ router.post('/add_employee', upload.single('image'), (req, res) => {
     })
 });
 
+// Getting all the employees in the company
+
 router.get('/employee', (req, res) => {
     const sql = "SELECT * FROM employee";
     con.query(sql, (err, result) => {
@@ -89,13 +93,93 @@ router.get('/employee', (req, res) => {
     });
 });
 
-router.get('employee/:id', (req, res) => {
+// Getting one employee information
+
+router.get('/employee/:id', (req, res) => {
     const id = req.params.id;
-    const sql = "SELECT * FROM employee WHERE id = ?";
+    const sql = `SELECT * FROM employee
+        WHERE id = ?`;
     con.query(sql, [id], (err, result) => {
-        if (err) return res.json({ Status: false, Error: "Query error" })
+        if (err) return res.json({ Status: false, Error: "Query Error" })
         return res.json({ Status: true, Result: result })
     });
-})
+});
+
+// Editing employee details
+
+router.put('/edit_employee/:id', (req, res) => {
+    const id = req.params.id;
+    const sql = `UPDATE employee 
+        SET name = ?, email = ?, salary = ?, address = ?, category_id = ? 
+        WHERE id = ?`;
+    const values = [
+        req.body.name,
+        req.body.email,
+        req.body.salary,
+        req.body.address,
+        req.body.category_id
+    ]
+    con.query(sql, [...values, id], (err, result) => {
+        if (err) return res.json({ Status: false, Error: "Query Error" + err })
+        return res.json({ Status: true, Result: result })
+    });
+});
+
+// Deleting employees records from the system
+
+router.delete('/delete_employee/:id', (req, res) => {
+    const id = req.params.id;
+    const sql = "DELETE FROM employee WHERE id = ?";
+    con.query(sql, [id], (err, result) => {
+        if (err) return res.json({ Status: false, Error: "Query Error" + err })
+        return res.json({ Status: true, Result: result })
+    });
+});
+
+// Return total number of admins in the company
+
+router.get('/admin_count', (req, res) => {
+    const sql = "SELECT COUNT(id) AS admin FROM admin";
+    con.query(sql, (err, result) => {
+        if (err) return res.json({ Status: false, Error: "Query Error" + err })
+        return res.json({ Status: true, Result: result })
+    });
+});
+// Return total number of employees in the company
+
+router.get('/employee_count', (req, res) => {
+    const sql = "SELECT COUNT(id) AS employee FROM employee";
+    con.query(sql, (err, result) => {
+        if (err) return res.json({ Status: false, Error: "Query Error" + err })
+        return res.json({ Status: true, Result: result })
+    });
+});
+
+// Return total salaries for the company
+
+router.get('/salary_count', (req, res) => {
+    const sql = "SELECT SUM(salary) AS salary FROM employee";
+    con.query(sql, (err, result) => {
+        if (err) return res.json({ Status: false, Error: "Query Error" + err })
+        return res.json({ Status: true, Result: result })
+    });
+});
+
+// Return admin information
+
+router.get('/admin_records', (req, res) => {
+    const sql = "SELECT * FROM admin";
+    con.query(sql, (err, result) => {
+        if (err) return res.json({ Status: false, Error: "Query Error" + err })
+        return res.json({ Status: true, Result: result })
+    });
+});
+
+// Logout of the system and remove token from cookies
+
+router.get('/logout', (req, res) => {
+    res.clearCookie('token');
+    return res.json({ Status: true })
+});
 
 export { router as AdminRouter }
