@@ -7,6 +7,8 @@ import path from "path";
 
 const router = express.Router();
 
+// Login for admins
+
 router.post('/adminlogin', (req, res) => {
     const sql = "SELECT * FROM admin WHERE email = ? and password = ?";
     con.query(sql, [req.body.email, req.body.password], (err, result) => {
@@ -14,7 +16,7 @@ router.post('/adminlogin', (req, res) => {
         if (result.length > 0) {
             const email = result[0].email;
             const token = jwt.sign(
-                { role: "admin", email: email },
+                { role: "admin", email: email, id: result[0].id },
                 "jwt_secret_key",
                 { expiresIn: "1d" }
 
@@ -27,6 +29,8 @@ router.post('/adminlogin', (req, res) => {
     });
 });
 
+// Getting the departments in the company
+
 router.get('/category', (req, res) => {
     const sql = "SELECT * FROM category";
     con.query(sql, (err, result) => {
@@ -34,6 +38,8 @@ router.get('/category', (req, res) => {
         return res.json({ Status: true, Result: result })
     });
 });
+
+// Adding the departments in the company
 
 router.post('/add_category', (req, res) => {
     const sql = "INSERT INTO category (`name`) VALUES (?)";
