@@ -1,18 +1,20 @@
-import mysql from 'mysql';
+import pkg from 'pg';
+const { Pool } = pkg;
 
-const con = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "admin12345",
-    database: "employeems"
+const pool = new Pool({
+  user: 'postgres',
+  host: 'localhost',
+  database: 'Employee',
+  password: '',
+  port: 5432, // PostgreSQL default port
 });
 
-con.connect(function(err) {
-    if(err) {
-        console.log("connection error");
-    } else {
-        console.log("Connected");
-    }
-})
+pool.connect((err, client, release) => {
+  if (err) {
+    console.error('Error acquiring client', err.stack);
+    return;
+  }
+  console.log('Connected to PostgreSQL database');
+});
 
-export default con;
+export default pool;
